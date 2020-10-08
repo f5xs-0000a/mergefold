@@ -1,0 +1,9 @@
+[package]
+name = "mergefold"
+version = "1.0.0"
+authors = ["F5XS <f5xs.0000a@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
