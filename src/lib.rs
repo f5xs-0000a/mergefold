@@ -13,11 +13,6 @@ where F: Fn(T, T) -> T {
         }
     }
 
-    pub fn push(&mut self, value: T) {
-        self.vec.push((value, 0));
-        self.recursive_fold();
-    }
-
     pub fn count(&self) -> usize {
         self.vec
             .iter()
@@ -25,27 +20,37 @@ where F: Fn(T, T) -> T {
             .sum::<usize>()
     }
 
-    fn recursive_fold(&mut self) {
-        if self.vec.len() == 1 {
-            return;
+    pub fn push(&mut self, value: T) {
+        self.push_recursive(value, 0);
+    }
+
+    fn push_recursive(&mut self, value: T, counter: u8) {
+        let mut should_pop = false;
+        
+        // check the last element if its counter is the same as the queried
+        // counter. if it's the same, we can fold them together. if it's not,
+        // we append to the vector. if the last doesn't exist, we still append
+        // to the vector.
+        if let Some(last) = self.vec.last() {
+            if last.1 == counter {
+                should_pop = true;
+            }
         }
 
-        // check the last two elements if they have the same counter
-        let last_1 = self.vec.pop().unwrap();
-        let last_2 = self.vec.pop().unwrap();
+        // goes here if the counter of the last element is the same as the
+        // queried counter
+        if should_pop {
+            let (last_value, _) = self.vec.pop().unwrap();
+            let value = (self.f)(last_value, value);
+            let counter = counter + 1;
 
-        if last_1.1 == last_2.1 {
-            let result = (self.f)(last_1.0, last_2.0);
-            let counter = last_1.1 + 1;
-
-            self.vec.push((result, counter));
-            self.recursive_fold();
+            self.push_recursive(value, counter);
         }
 
+        // goes here if the counter of the last element is not the same as the
+        // queried counter OR the last element doesn't exist yet
         else {
-            // push the values back
-            self.vec.push(last_2);
-            self.vec.push(last_1);
+            self.vec.push((value, counter));
         }
     }
 
