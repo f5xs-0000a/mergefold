@@ -1,3 +1,12 @@
+/// A structure that folds over `T` in a way similar to the game 2048.
+///
+/// Each `T` along with an exponent of 0 are pushed into the stack.
+/// If there are two of `T` next to each other with the same exponent, the two
+/// `T` are folded using `F` and the exponent is incremented.
+///
+/// Note that `F` does not have context of the magnitude of each `T`, so folding
+/// two of `T` each with the same exponent is the same as folding two of `T`
+/// with really big exponent differences.
 pub struct MergeFold<T, F>
 where F: Fn(T, T) -> T {
     vec: Vec<(T, u8)>,
@@ -6,6 +15,8 @@ where F: Fn(T, T) -> T {
 
 impl<T, F> MergeFold<T, F>
 where F: Fn(T, T) -> T {
+    /// Creates a new MergeFold object generic over object `T` and a folding
+    /// method `F`.
     pub fn new(fold: F) -> MergeFold<T, F> {
         MergeFold {
             vec: vec![],
@@ -13,6 +24,9 @@ where F: Fn(T, T) -> T {
         }
     }
 
+    /// Counts the number of pushes done.
+    ///
+    /// In implementation, this just sums the power of 2 of exponents.
     pub fn count(&self) -> usize {
         self.vec
             .iter()
@@ -20,6 +34,7 @@ where F: Fn(T, T) -> T {
             .sum::<usize>()
     }
 
+    /// Pushes an object `T` into the stack.
     pub fn push(&mut self, value: T) {
         self.push_recursive(value, 0);
     }
@@ -54,6 +69,11 @@ where F: Fn(T, T) -> T {
         }
     }
 
+    /// Folds the entire stack. 
+    ///
+    /// Note that `F` does not have context of the magnitude of each `T`, so
+    /// folding two of `T` each with the same exponent is the same as folding
+    /// two of `T` with really big exponent differences.
     pub fn fold(self) -> Option<T> {
         // we're reversing so we get to emphasize the lower values first
         let (f, vec) = (self.f, self.vec);
